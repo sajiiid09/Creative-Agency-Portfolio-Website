@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+/* FIX: Ensure html/body allow sticky behavior to propagate */
+html, body {
+  height: auto; /* Do not force 100% height here */
+  min-height: 100vh;
+  scroll-behavior: smooth;
+}
+
+/* OPTIONAL: If you must hide horizontal overflow, use 'clip' instead of 'hidden' 
+   on the body to reduce risk of breaking sticky, or apply it to a specific wrapper */
+body {
+  overflow-x: clip; 
+}
