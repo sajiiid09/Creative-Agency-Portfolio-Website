@@ -38,3 +38,5 @@ npm run lint
 - Only features available in the beta are presented as available. Unfinished modules are listed under "In development".
 - Every link points to a verified destination (see `LINKS` in `content/pulse.ts`).
 - Animations respect `prefers-reduced-motion`.
+
+See [`docs/HANDOFF.md`](docs/HANDOFF.md) for context, decisions and open items.
