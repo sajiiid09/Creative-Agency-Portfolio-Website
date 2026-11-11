@@ -120,7 +120,6 @@ export const ANALYTICS = {
 // Section copy
 // ---------------------------------------------------------------------------
 export const HERO = {
-  eyebrow: 'Now in beta · Pulse by RACO AI',
   headline: ['From message to order.', 'Automatically.'],
   body: 'Pulse brings your customer conversations, AI sales assistant, products, and orders into one intelligent workspace.',
   primary: { label: 'Request beta access', href: LINKS.requestAccess },
@@ -133,8 +132,17 @@ export const HERO = {
 };
 
 export const CHAOS = {
-  eyebrow: 'Why Pulse',
+  eyebrow: 'What is Pulse',
   headline: 'Your business happens in conversations. Pulse brings it all together.',
+  story: {
+    label: 'Customers message you. Pulse answers and drafts the order.',
+    beats: [
+      { lead: 'Customers', tail: 'message you', chip: 'Size 39 in stock?' },
+      { lead: 'Pulse', tail: 'answers', chip: 'Yes! Tk 3,450' },
+      { lead: 'and drafts', tail: 'the order.', chip: '#PL-1042' },
+    ],
+    sub: 'Pulse is the AI sales assistant for Messenger and Instagram. It replies from your catalogue, turns chats into orders, and keeps every customer in one workspace.',
+  },
   problems: [
     'Messages scattered across Messenger and Instagram',
     'The same price, stock and delivery questions — all day',

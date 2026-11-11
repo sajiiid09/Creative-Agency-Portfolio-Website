@@ -10,29 +10,27 @@
  * "message → reply → order draft" sequence inside the expanding interface.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  motion, MotionValue, useMotionValue, useReducedMotion, useScroll, useSpring,
-  useTransform, useVelocity,
-} from 'framer-motion';
+import { motion, MotionValue, useMotionValue, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Sparkles, UserRound, ShoppingBag, Clock3, Inbox, Users, Package, ReceiptText, BarChart3 } from 'lucide-react';
 import { CONVERSATION, DEMO, HERO, money } from '@/content/pulse';
-import { Avatar, ChannelIcon, CTAButton, DemoLabel, Eyebrow, AITag, PulseAppTile } from '../ui/primitives';
+import { Avatar, ChannelIcon, CTAButton, AITag, PulseAppTile } from '../ui/primitives';
 import { ChatBubble, MiniStat, OrderDraftCard, ProductQuoteCard, ThreadList, TypingDots } from '../ui/mocks';
 
 // Design size of the interface canvas; it is scaled to fit the expanding card.
 const CANVAS = { desktop: { w: 1280, h: 760 }, mobile: { w: 380, h: 700 } };
 
-// Card geometry per breakpoint, in viewport units: [thumbnail, expanded]
+// Expanded dashboard size per breakpoint, in viewport units
 const GEOMETRY = {
-  desktop: { w: [34, 92], h: [33, 82], top: [80, 52] },
-  mobile: { w: [86, 94], h: [21, 76], top: [88, 53] },
+  desktop: { w: 90, h: 74, top: 48 },
+  mobile: { w: 94, h: 64, top: 45 },
 };
 
 // Scroll choreography (progress 0 → 1 across the pinned track)
 const T = {
   introOut: [0, 0.1],
-  expand: [0.06, 0.3],
-  cover: [0.14, 0.24],
+  zoom: [0.03, 0.12, 0.2, 0.28], // camera flies into the "U" of PULSE
+  wordOut: [0.22, 0.28],
+  expand: [0.12, 0.31], // dashboard grows out of the letter
   msg1: [0.32, 0.37],
   typing: [0.38, 0.42, 0.45],
   msg2: [0.44, 0.5],
@@ -71,96 +69,113 @@ export default function Hero() {
 // ---------------------------------------------------------------------------
 function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const wordRef = useRef<HTMLParagraphElement>(null);
+  const uRef = useRef<HTMLSpanElement>(null);
   const { scrollYProgress: p } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] });
   const g = vp.mobile ? GEOMETRY.mobile : GEOMETRY.desktop;
   const canvas = vp.mobile ? CANVAS.mobile : CANVAS.desktop;
 
-  // Mouse-velocity tilt on the thumbnail (from the original hero), fading out as it expands.
-  const mouseX = useMotionValue(0);
-  const velX = useVelocity(mouseX);
-  const tilt = useSpring(useTransform(velX, [-2500, 2500], [-6, 6]), { stiffness: 300, damping: 40 });
-  const rotate = useTransform([tilt, p] as MotionValue<number>[], ([r, pp]: number[]) => r * Math.max(0, 1 - pp / 0.08));
+  // Point inside the "U" counter we zoom into. offset* values ignore transforms,
+  // so this stays correct even when the page is reloaded mid-scroll.
+  const [focus, setFocus] = useState({ ox: vp.w / 2, oy: 0, cx: vp.w / 2, cy: vp.h * 0.8, uw: 120 });
+  useEffect(() => {
+    const measure = () => {
+      const word = wordRef.current;
+      const u = uRef.current;
+      if (!word || !u) return;
+      const ox = u.offsetLeft + u.offsetWidth / 2;
+      const oy = u.offsetTop + u.offsetHeight * 0.36;
+      setFocus({ ox, oy, cx: word.offsetLeft + ox, cy: word.offsetTop + oy, uw: u.offsetWidth * 0.32 });
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [vp.w, vp.h]);
 
   // Intro copy
   const introOpacity = useTransform(p, T.introOut, [1, 0]);
   const introY = useTransform(p, T.introOut, [0, -70]);
   const introEvents = useTransform(introOpacity, (v) => (v > 0.4 ? 'auto' : 'none'));
 
-  // Wordmark
-  const wordScale = useTransform(p, [0, 0.3], [1, 1.12]);
-  const wordOpacity = useTransform(p, [0.12, 0.3], [1, 0.0]);
+  // Wordmark: accelerating zoom into the U, then it fades away
+  const wordScale = useTransform(p, T.zoom, [1, 2.4, 7, 26]);
+  const wordOpacity = useTransform(p, T.wordOut, [1, 0]);
 
-  // Card expansion
-  const width = useTransform(p, T.expand, [`${g.w[0]}vw`, `${g.w[1]}vw`]);
-  const height = useTransform(p, T.expand, [`${g.h[0]}vh`, `${g.h[1]}vh`]);
-  const top = useTransform(p, T.expand, [`${g.top[0]}vh`, `${g.top[1]}vh`]);
-  const radius = useTransform(p, T.expand, [32, 28]);
-  const settleScale = useTransform(p, T.settle, [1, vp.mobile ? 0.9 : 0.84]);
-  const coverOpacity = useTransform(p, T.cover, [1, 0]);
-  const canvasOpacity = useTransform(p, T.cover, [0, 1]);
+  // Dashboard grows out of the U and settles in the centre of the screen
+  const endW = (g.w / 100) * vp.w;
+  const endH = (g.h / 100) * vp.h;
+  const startW = focus.uw;
+  const startH = focus.uw * 0.62;
+  const t = (pp: number) => Math.min(1, Math.max(0, (pp - T.expand[0]) / (T.expand[1] - T.expand[0])));
+  const ease = (x: number) => 1 - Math.pow(1 - x, 3);
+  const width = useTransform(p, (pp) => startW + (endW - startW) * ease(t(pp)));
+  const height = useTransform(p, (pp) => startH + (endH - startH) * ease(t(pp)));
+  const left = useTransform(p, (pp) => focus.cx + (vp.w / 2 - focus.cx) * ease(t(pp)));
+  const top = useTransform(p, (pp) => focus.cy + ((g.top / 100) * vp.h - focus.cy) * ease(t(pp)));
+  const radius = useTransform(p, T.expand, [14, 28]);
+  const cardOpacity = useTransform(p, [T.expand[0], T.expand[0] + 0.03], [0, 1]);
+  const settleScale = useTransform(p, T.settle, [1, vp.mobile ? 0.92 : 0.86]);
+
+  // CTAs: fade in after the expansion completes
+  const ctaOpacity = useTransform(p, [T.expand[1], T.expand[1] + 0.04], [0, 1]);
+  const ctaY = useTransform(p, [T.expand[1], T.expand[1] + 0.04], [24, 0]);
+  const ctaEvents = useTransform(ctaOpacity, (v) => (v > 0.5 ? 'auto' : 'none'));
 
   // Fit the fixed-size canvas into the card at every scroll position.
   const canvasScale = useTransform(p, (pp) => {
-    const t = Math.min(1, Math.max(0, (pp - T.expand[0]) / (T.expand[1] - T.expand[0])));
-    const wPx = ((g.w[0] + (g.w[1] - g.w[0]) * t) / 100) * vp.w;
-    const hPx = ((g.h[0] + (g.h[1] - g.h[0]) * t) / 100) * vp.h;
-    return Math.min(wPx / canvas.w, hPx / canvas.h);
+    const k = ease(t(pp));
+    return Math.min((startW + (endW - startW) * k) / canvas.w, (startH + (endH - startH) * k) / canvas.h);
   });
 
   return (
-    <section
-      id="top"
-      ref={sectionRef}
-      onMouseMove={(e) => mouseX.set(e.clientX)}
-      className="relative h-[420vh] bg-mesh-hero"
-      aria-label="Pulse — from message to order"
-    >
+    <section id="top" ref={sectionRef} className="relative h-[420vh] bg-mesh-hero" aria-label="Pulse — from message to order">
       <div className="grain sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* ambient glows */}
         <div className="glow-mint absolute -left-40 top-10 h-[50vh] w-[50vw]" aria-hidden />
         <div className="glow-teal absolute -right-40 bottom-0 h-[50vh] w-[45vw]" aria-hidden />
 
-        {/* OVERSIZED WORDMARK */}
+        {/* OVERSIZED WORDMARK — the camera zooms into the U */}
         <motion.p
+          ref={wordRef}
           aria-hidden
-          style={{ scale: wordScale, opacity: wordOpacity }}
-          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-[-4vw] select-none text-center font-display text-[30vw] font-bold leading-[0.8] tracking-[-0.06em] md:bottom-[-3.5vw] md:text-[27vw]"
+          style={{ scale: wordScale, opacity: wordOpacity, transformOrigin: `${focus.ox}px ${focus.oy}px` }}
+          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-[-4vw] z-10 select-none text-center font-display text-[30vw] font-bold leading-[0.8] tracking-[-0.06em] will-change-transform md:bottom-[-3.5vw] md:text-[27vw]"
         >
-          PULSE
+          P<span ref={uRef}>U</span>LSE
         </motion.p>
 
         {/* INTRO COPY (first viewport) */}
         <motion.div
           style={{ opacity: introOpacity, y: introY, pointerEvents: introEvents as unknown as MotionValue<string> }}
-          className="relative z-30 mx-auto flex max-w-5xl flex-col items-center px-5 pt-[88px] text-center md:pt-[15vh]"
+          className="relative z-30 mx-auto flex max-w-4xl flex-col items-center px-5 pt-[104px] text-center md:pt-[16vh]"
         >
           <IntroCopy />
         </motion.div>
 
-        {/* EXPANDING PRODUCT CARD */}
+        {/* DASHBOARD — expands out of the letter */}
         <motion.div
-          style={{ width, height, top, rotate, scale: settleScale, borderRadius: radius }}
-          className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2 overflow-hidden bg-[#f6f9f6] shadow-lift ring-1 ring-white/80"
+          style={{ width, height, left, top, opacity: cardOpacity, scale: settleScale, borderRadius: radius }}
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 overflow-hidden bg-[#f6f9f6] shadow-lift ring-1 ring-white/80"
         >
-          {/* Interface canvas */}
-          <motion.div style={{ opacity: canvasOpacity }} className="absolute inset-0 grid place-items-center">
+          <div className="absolute inset-0 grid place-items-center">
             <motion.div style={{ width: canvas.w, height: canvas.h, scale: canvasScale }} className="shrink-0 origin-center">
               {vp.mobile ? <MobileCanvas p={p} /> : <DesktopCanvas p={p} />}
             </motion.div>
-          </motion.div>
-
-          {/* Thumbnail cover (readable at small size) */}
-          <motion.div style={{ opacity: coverOpacity }} className="pointer-events-none absolute inset-0">
-            <ThumbnailCover />
-          </motion.div>
+          </div>
         </motion.div>
 
         {/* FLOATING CARDS ON ARC PATHS */}
         <FloatingCards p={p} mobile={vp.mobile} />
 
-        <motion.div style={{ opacity: useTransform(p, [0.3, 0.36], [0, 1]) }} className="absolute bottom-4 left-1/2 z-40 -translate-x-1/2">
-          <DemoLabel />
+        {/* CTAs appear only once the dashboard is fully shown */}
+        <motion.div
+          style={{ opacity: ctaOpacity, y: ctaY, pointerEvents: ctaEvents as unknown as MotionValue<string> }}
+          className="absolute inset-x-0 bottom-[3vh] z-40 flex justify-center px-5"
+        >
+          <HeroCTAs />
         </motion.div>
+
 
         {/* Scroll cue */}
         <motion.div
@@ -178,39 +193,24 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
 function IntroCopy() {
   return (
     <>
-      <Eyebrow className="mb-4 rounded-full md:mb-5 bg-white/70 px-3 py-1.5 ring-1 ring-forest/10 backdrop-blur">{HERO.eyebrow}</Eyebrow>
-      <h1 className="text-balance font-display text-[36px] font-semibold leading-[0.98] tracking-[-0.035em] text-forest sm:text-6xl md:text-[clamp(56px,6.4vw,104px)]">
+      <h1 className="text-balance font-display text-[32px] font-semibold leading-[1.02] tracking-[-0.03em] text-forest sm:text-[44px] md:text-[clamp(44px,4.2vw,66px)]">
         {HERO.headline[0]}
         <br />
         <span className="text-teal">{HERO.headline[1]}</span>
       </h1>
-      <p className="mt-4 max-w-xl text-pretty text-[15px] leading-relaxed text-ink-soft md:mt-6 md:text-lg">{HERO.body}</p>
-      <div className="mt-5 flex flex-col items-center gap-2.5 sm:flex-row sm:gap-3 md:mt-8">
-        <CTAButton href={HERO.primary.href}>{HERO.primary.label}</CTAButton>
-        <CTAButton href={HERO.secondary.href} variant="secondary">
-          {HERO.secondary.label}
-        </CTAButton>
-      </div>
+      <p className="mt-3 max-w-md text-pretty text-[15px] leading-relaxed text-ink-soft md:mt-4 md:max-w-lg md:text-[17px]">{HERO.body}</p>
     </>
   );
 }
 
-function ThumbnailCover() {
+/** Hero CTAs — revealed once the dashboard has fully expanded. */
+function HeroCTAs({ className = '' }: { className?: string }) {
   return (
-    <div className="relative h-full w-full">
-      <img src={DEMO.product.img} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-forest/55 via-forest/5 to-transparent" />
-      <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2 md:inset-x-5 md:bottom-5">
-        <div className="flex max-w-[92%] items-end gap-2">
-          <Avatar initials={DEMO.customer.initials} className="h-7 w-7 text-[10px]" />
-          <p className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2 text-[13px] font-medium leading-snug text-forest shadow-soft md:text-sm">
-            Are these available in size 39?
-          </p>
-        </div>
-        <p className="ml-9 inline-flex w-fit items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-teal">
-          <ChannelIcon channel="instagram" className="h-3.5 w-3.5" /> Pulse is replying…
-        </p>
-      </div>
+    <div className={`flex flex-col items-center gap-2.5 sm:flex-row sm:gap-3 ${className}`}>
+      <CTAButton href={HERO.primary.href} className="shadow-lift">{HERO.primary.label}</CTAButton>
+      <CTAButton href={HERO.secondary.href} variant="secondary" className="!bg-white shadow-lift">
+        {HERO.secondary.label}
+      </CTAButton>
     </div>
   );
 }
@@ -340,7 +340,6 @@ function FloatingCards({ p, mobile }: { p: MotionValue<number>; mobile: boolean 
   const cards = mobile
     ? [
         { key: 'product', from: [-160, 220, -20], to: [0, 0, -3], className: 'left-3 top-[12vh] w-[250px]' },
-        { key: 'stat', from: [160, 240, 20], to: [0, 0, 3], className: 'right-3 bottom-[9vh] w-[150px]' },
       ]
     : [
         { key: 'product', from: [-420, 260, -24], to: [0, 0, -4], className: 'left-[3vw] top-[18vh] w-[290px]' },
@@ -407,7 +406,7 @@ function StaticHero({ mobile }: { mobile: boolean }) {
         <div className="overflow-hidden rounded-[28px] shadow-lift ring-1 ring-white/80" style={{ aspectRatio: mobile ? '380 / 700' : '1280 / 760' }}>
           <div className="h-full w-full">{mobile ? <MobileCanvas p={one} /> : <DesktopCanvas p={one} />}</div>
         </div>
-        <DemoLabel className="mt-4" />
+        <HeroCTAs className="mt-6" />
       </div>
     </section>
   );

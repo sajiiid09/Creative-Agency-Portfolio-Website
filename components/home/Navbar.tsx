@@ -105,9 +105,6 @@ export default function Navbar() {
         </nav>
 
         <div className="pointer-events-auto flex items-center gap-5">
-          <a href={LINKS.signIn} target="_blank" rel="noopener noreferrer" className="rounded-full">
-            <FlipLink>Sign in</FlipLink>
-          </a>
           <CTAButton href={LINKS.requestAccess}>Try Pulse</CTAButton>
         </div>
 
@@ -231,16 +228,6 @@ export default function Navbar() {
                     </a>
                   </li>
                 ))}
-                <li>
-                  <a
-                    href={LINKS.signIn}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-base font-medium text-ink-soft"
-                  >
-                    Sign in to Pulse <span aria-hidden>↗</span>
-                  </a>
-                </li>
               </ul>
             </motion.nav>
           )}
