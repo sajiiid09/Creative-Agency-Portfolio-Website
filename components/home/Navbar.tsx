@@ -105,7 +105,7 @@ export default function Navbar() {
           <a href={LINKS.signIn} target="_blank" rel="noopener noreferrer" className="rounded-full">
             <FlipLink>Sign in</FlipLink>
           </a>
-          <CTAButton href={LINKS.requestAccess}>Request access</CTAButton>
+          <CTAButton href={LINKS.requestAccess}>Try Pulse</CTAButton>
         </div>
 
         {/* Mega dropdown */}
@@ -178,7 +178,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="rounded-full bg-forest px-4 py-2 text-[13.5px] font-semibold text-white"
             >
-              Request access
+              Try Pulse
             </a>
             <button
               type="button"
