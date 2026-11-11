@@ -187,7 +187,7 @@ export default function UseCases() {
           >
             {/* offset to the right of the cursor so the row title stays readable */}
             <div className="translate-x-10 -translate-y-1/2">
-              <PreviewFrame id={items[hovered].id} className="h-[340px] w-[400px]" />
+              <PreviewFrame id={items[hovered].id} className="h-[390px] w-[400px]" />
             </div>
           </motion.div>
         )}
