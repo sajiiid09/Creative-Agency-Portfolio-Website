@@ -134,6 +134,8 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
         {/* ambient glows */}
         <div className="glow-mint absolute -left-40 top-10 h-[50vh] w-[50vw]" aria-hidden />
         <div className="glow-teal absolute -right-40 bottom-0 h-[50vh] w-[45vw]" aria-hidden />
+        {/* dark green shade along the top, melting into the mint mesh */}
+        <div className="hero-top-shade pointer-events-none absolute inset-x-0 top-0 h-[24vh] md:h-[30vh]" aria-hidden />
 
         {/* OVERSIZED WORDMARK — the camera zooms into the U */}
         <motion.p
@@ -148,7 +150,7 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
         {/* INTRO COPY (first viewport) */}
         <motion.div
           style={{ opacity: introOpacity, y: introY, pointerEvents: introEvents as unknown as MotionValue<string> }}
-          className="relative z-30 mx-auto flex max-w-4xl flex-col items-center px-5 pt-[104px] text-center md:pt-[16vh]"
+          className="relative z-30 mx-auto flex max-w-4xl flex-col items-center px-5 pt-[22vh] text-center md:pt-[27vh]"
         >
           <IntroCopy />
         </motion.div>
@@ -399,6 +401,7 @@ function StaticHero({ mobile }: { mobile: boolean }) {
   const one = useMotionValue(1);
   return (
     <section id="top" className="relative overflow-hidden bg-mesh-hero pb-20" aria-label="Pulse — from message to order">
+      <div className="hero-top-shade pointer-events-none absolute inset-x-0 top-0 h-[260px]" aria-hidden />
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-5 pt-[120px] text-center">
         <IntroCopy />
       </div>

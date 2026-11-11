@@ -5,9 +5,9 @@ import PulseMark from './PulseMark';
 type Channel = 'instagram' | 'messenger';
 
 /** Pulse logo — the brand mark only (no wordmark; the hero carries the name). */
-export function PulseLogo({ className = '' }: { className?: string }) {
+export function PulseLogo({ className = '', tone = 'brand' }: { className?: string; tone?: 'brand' | 'white' }) {
   return (
-    <span className={`inline-flex items-center text-[#025b4f] ${className}`}>
+    <span className={`inline-flex items-center transition-colors duration-300 ${tone === 'white' ? 'text-white' : 'text-[#025b4f]'} ${className}`}>
       <PulseMark className="h-9 w-auto" />
     </span>
   );

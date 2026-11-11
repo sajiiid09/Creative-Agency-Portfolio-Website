@@ -87,6 +87,13 @@ body {
     radial-gradient(80% 80% at 50% 50%, #145752 0%, #0f403d 55%, #153b37 100%);
 }
 
+.hero-top-shade {
+  background:
+    radial-gradient(60% 120% at 18% 0%, rgba(197, 228, 120, 0.16) 0%, transparent 60%),
+    radial-gradient(55% 110% at 85% 0%, rgba(213, 230, 225, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #0e3b38 0%, #12504b 30%, rgba(20, 87, 82, 0.62) 55%, rgba(156, 199, 187, 0.25) 80%, rgba(251, 252, 249, 0) 100%);
+}
+
 .glow-teal {
   background: radial-gradient(closest-side, rgba(11, 79, 75, 0.18), transparent);
   filter: blur(40px);

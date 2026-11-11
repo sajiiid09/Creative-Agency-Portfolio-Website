@@ -29,10 +29,16 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // true while the dark top shade of the hero sits behind the header
+  const [onDark, setOnDark] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+      const hero = document.getElementById(ANCHORS.top);
+      setOnDark(!!hero && window.scrollY < hero.offsetTop + hero.offsetHeight - window.innerHeight * 0.9);
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setDropdownOpen(false);
@@ -52,6 +58,8 @@ export default function Navbar() {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
   }, [mobileOpen]);
 
+  const mobileDark = onDark && !mobileOpen;
+
   const open = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDropdownOpen(true);
@@ -67,18 +75,18 @@ export default function Navbar() {
         <a
           href={`#${ANCHORS.top}`}
           aria-label="Pulse home"
-          className={`pointer-events-auto flex items-center rounded-full border border-white/70 px-4 py-2.5 backdrop-blur-xl transition-all duration-300 ${
-            scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55'
+          className={`pointer-events-auto flex items-center rounded-full border px-4 py-2.5 backdrop-blur-xl transition-all duration-300 ${
+            onDark ? 'border-white/15 bg-white/5' : scrolled ? 'border-white/70 bg-white/80 shadow-soft' : 'border-white/70 bg-white/55'
           }`}
         >
-          <PulseLogo className="[&_svg]:h-8" />
+          <PulseLogo tone={onDark ? 'white' : 'brand'} className="[&_svg]:h-8" />
         </a>
 
         <nav
           aria-label="Primary"
           onMouseLeave={close}
           className={`pointer-events-auto absolute left-1/2 flex -translate-x-1/2 items-center gap-6 rounded-full border border-white/70 px-6 py-2 backdrop-blur-xl transition-all duration-300 ${
-            scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55 shadow-[0_8px_32px_rgba(21,59,55,0.05)]'
+            onDark ? 'bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.12)]' : scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55 shadow-[0_8px_32px_rgba(21,59,55,0.05)]'
           }`}
         >
           {NAV.map((link) =>
@@ -105,7 +113,7 @@ export default function Navbar() {
         </nav>
 
         <div className="pointer-events-auto flex items-center gap-5">
-          <CTAButton href={LINKS.requestAccess}>Try Pulse</CTAButton>
+          <CTAButton href={LINKS.requestAccess} variant={onDark ? 'light' : 'primary'}>Try Pulse</CTAButton>
         </div>
 
         {/* Mega dropdown */}
@@ -164,19 +172,19 @@ export default function Navbar() {
       {/* ---------------- Mobile / tablet ---------------- */}
       <div className="pointer-events-auto px-3 pt-3 lg:hidden">
         <div
-          className={`flex items-center justify-between gap-2 rounded-full border border-white/70 py-1.5 pl-3 pr-1.5 backdrop-blur-xl transition-colors ${
-            scrolled || mobileOpen ? 'bg-white/90 shadow-soft' : 'bg-white/60'
+          className={`flex items-center justify-between gap-2 rounded-full border py-1.5 pl-3 pr-1.5 backdrop-blur-xl transition-colors duration-300 ${
+            mobileDark ? 'border-white/15 bg-white/5' : scrolled || mobileOpen ? 'border-white/70 bg-white/90 shadow-soft' : 'border-white/70 bg-white/60'
           }`}
         >
           <a href={`#${ANCHORS.top}`} aria-label="Pulse home" className="rounded-full" onClick={() => setMobileOpen(false)}>
-            <PulseLogo className="px-1 [&_svg]:h-8" />
+            <PulseLogo tone={mobileDark ? 'white' : 'brand'} className="px-1 [&_svg]:h-8" />
           </a>
           <div className="flex items-center gap-1.5">
             <a
               href={LINKS.requestAccess}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-forest px-4 py-2 text-[13.5px] font-semibold text-white"
+              className={`rounded-full px-4 py-2 text-[13.5px] font-semibold transition-colors duration-300 ${mobileDark ? 'bg-brand text-forest' : 'bg-forest text-white'}`}
             >
               Try Pulse
             </a>
@@ -186,7 +194,7 @@ export default function Navbar() {
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              className="grid h-10 w-10 place-items-center rounded-full bg-mint text-forest"
+              className={`grid h-10 w-10 place-items-center rounded-full transition-colors duration-300 ${mobileDark ? 'bg-white/15 text-white' : 'bg-mint text-forest'}`}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
