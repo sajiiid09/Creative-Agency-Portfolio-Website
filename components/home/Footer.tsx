@@ -1,92 +1,57 @@
-'use client';
-
 import React from 'react';
-import { motion } from 'framer-motion';
-
-const socialIcons = [
-  { name: 'Twitter', src: 'https://cdn.prod.website-files.com/689989c2270f878736e77521/689989c2270f878736e77560_twitter.png' },
-  { name: 'Instagram', src: 'https://cdn.prod.website-files.com/689989c2270f878736e77521/689989c2270f878736e77624_instagram-black.webp' },
-  { name: 'Facebook', src: 'https://cdn.prod.website-files.com/689989c2270f878736e77521/689989c2270f878736e7761d_facebook-black.webp' },
-];
-
-const links = {
-  explore: ['Home', 'About', 'Works', 'Services', 'Contact'],
-  more: ['Style Guide', 'Licensing', 'Changelog', 'Password', '404'],
-  contact: ['123 Styler Ave, NY', 'contact@styler.com', '+1 (555) 012-3456']
-};
+import { FOOTER, LINKS } from '@/content/pulse';
+import { PulseLogo } from '../ui/primitives';
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#1a1a1a] text-white pt-24 pb-8 overflow-hidden rounded-t-[2.5rem]">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        
-        {/* Top Section: Brand & Links */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24">
-          
-          {/* Brand Col */}
-          <div className="md:col-span-4 flex flex-col gap-6">
-            <h2 className="text-3xl font-semibold">Pulse.</h2>
-            <p className="text-gray-400 max-w-xs leading-relaxed">
-              Crafting digital experiences that blend creativity with technology.
+    <footer className="relative overflow-hidden rounded-t-[2.5rem] bg-mesh-deep pb-8 pt-20 text-white">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8">
+        <div className="mb-20 grid grid-cols-1 gap-12 md:grid-cols-12">
+          <div className="flex flex-col gap-5 md:col-span-5">
+            <span className="w-fit rounded-2xl bg-white px-3 py-2">
+              <PulseLogo />
+            </span>
+            <p className="max-w-sm leading-relaxed text-white/75">{FOOTER.tagline}</p>
+            <p className="text-sm text-white/60">
+              Pulse by{' '}
+              <a href={LINKS.company} target="_blank" rel="noopener noreferrer" className="font-semibold text-white underline-offset-4 hover:underline">
+                RACO AI Technologies
+              </a>
             </p>
-            <div className="flex gap-4 mt-4">
-              {socialIcons.map((icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-                  <img src={icon.src} alt={icon.name} className="w-5 h-5 object-contain" />
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Links Cols */}
-          <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            {/* Explore */}
-            <div className="flex flex-col gap-4">
-              <h4 className="text-lg font-semibold mb-2">Explore</h4>
-              {links.explore.map((link, i) => (
-                <a key={i} href="#" className="text-gray-400 hover:text-white transition-colors">{link}</a>
-              ))}
-            </div>
-            {/* More */}
-            <div className="flex flex-col gap-4">
-              <h4 className="text-lg font-semibold mb-2">More</h4>
-              {links.more.map((link, i) => (
-                <a key={i} href="#" className="text-gray-400 hover:text-white transition-colors">{link}</a>
-              ))}
-            </div>
-            {/* Contacts */}
-            <div className="flex flex-col gap-4">
-              <h4 className="text-lg font-semibold mb-2">Contacts</h4>
-              {links.contact.map((info, i) => (
-                <span key={i} className="text-gray-400">{info}</span>
-              ))}
-            </div>
-          </div>
-
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-7">
+            {FOOTER.columns.map((col) => (
+              <div key={col.title} className="flex flex-col gap-3.5">
+                <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-brand">{col.title}</h3>
+                {col.links.map((l) => {
+                  const external = 'external' in l && l.external;
+                  return (
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="w-fit rounded text-white/75 transition-colors hover:text-white"
+                    >
+                      {l.label}
+                      {external && <span aria-hidden className="ml-1 text-white/40">↗</span>}
+                      {external && <span className="sr-only"> (opens in a new tab)</span>}
+                    </a>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
         </div>
 
-        {/* Big Text Feature */}
-        <div className="border-t border-white/10 pt-20 pb-16">
-          <motion.h1 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-[10vw] font-semibold leading-none text-center tracking-tight"
-          >
-            Design is Our Passion.
-          </motion.h1>
-        </div>
+        <p aria-hidden className="select-none border-t border-white/10 pt-10 text-center font-display text-[24vw] font-bold leading-[0.8] tracking-[-0.06em] text-white/[0.07] md:text-[20vw]">
+          pulse.
+        </p>
 
-        {/* Bottom Credits */}
-        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} Styler. All Rights Reserved.</p>
-          <div className="flex gap-6">
-            <span>Built by Yves Adrales</span>
-            <span>Powered by Webflow</span>
-          </div>
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row">
+          <p>© {new Date().getFullYear()} RACO AI Technologies. Pulse is in beta.</p>
+          <p>Product visuals on this site are illustrative and use fictional demo data.</p>
         </div>
-
       </div>
     </footer>
   );

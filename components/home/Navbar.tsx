@@ -1,229 +1,248 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+/**
+ * Floating-pill navigation (preserved from the original): FlipLink letter
+ * roll on hover, animated chevron and the glass mega-dropdown — now listing
+ * the five Pulse product areas. Adds a compact mobile bar + menu sheet.
+ */
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { BarChart3, Inbox, Menu, Package, ReceiptText, Sparkles, X } from 'lucide-react';
 import FlipLink from '../Effects/FlipLink';
-// --- DATA CONFIGURATION ---
+import { PulseLogo, CTAButton } from '../ui/primitives';
+import { ANCHORS, LINKS, NAV, SHOWCASE, type ShowcaseTabId } from '@/content/pulse';
 
-const NAV_LINKS = {
-  left: [
-    {
-      label: "Features",
-      hasDropdown: true,
-      content: [
-        { title: "Advanced Analytics", desc: "Real-time data insights", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a2d10d0123c0be15052ede_Glossy%20Tote%20Bags%20on%20Vibrant%20Background.webp" },
-        { title: "Smart Scheduling", desc: "Automate your workflow", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a2d16b259fd242a0ee6c1e_Modern%20Device%20Close-Up.webp" },
-        { title: "Team Collaboration", desc: "Work together seamlessly", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a07c52d7ac585cdfd6fa7e_Elegant%20Blonde%20Profile.webp" },
-        { title: "Asset Management", desc: "Organize your creative assets", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a07c6aeaa832d6e630e0ef_Vibrant%20Sports%20Jersey.webp" }
-      ]
-    },
-    {
-      label: "Use Cases",
-      hasDropdown: true,
-      content: [
-        { title: "For Agencies", desc: "Scale your client work", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a07c8e09898fa9493b1bbc_Modern%20Elegance%20Tech%20%26%20Texture.webp" },
-        { title: "For Startups", desc: "Move fast and break things", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a2d19782c018e44a110307_Modern%20Elegance_%20Tech%20%26%20Texture.webp" }
-      ]
-    }
-  ],
-  right: [
-    {
-      label: "Pricing",
-      hasDropdown: false,
-      href: "/pricing"
-    },
-    {
-      label: "Resources",
-      hasDropdown: true,
-      content: [
-        { title: "Blog", desc: "Latest industry news", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a07c52d7ac585cdfd6fa7e_Elegant%20Blonde%20Profile.webp" },
-        { title: "Support", desc: "Get help 24/7", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a2d10d0123c0be15052ede_Glossy%20Tote%20Bags%20on%20Vibrant%20Background.webp" },
-        { title: "Community", desc: "Join our discord", img: "https://cdn.prod.website-files.com/689989c2270f878736e77534/68a2d16b259fd242a0ee6c1e_Modern%20Device%20Close-Up.webp" }
-      ]
-    }
-  ]
+const TAB_ICONS: Record<ShowcaseTabId, React.ElementType> = {
+  inbox: Inbox,
+  'ai-setup': Sparkles,
+  catalog: Package,
+  orders: ReceiptText,
+  analytics: BarChart3,
 };
 
+/** Ask the product showcase to switch tab, then let the anchor scroll there. */
+export function openShowcaseTab(id: ShowcaseTabId) {
+  window.dispatchEvent(new CustomEvent('pulse:showcase-tab', { detail: id }));
+}
 
 export default function Navbar() {
-  const [activeTab, setActiveTab] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleMouseEnter = (tab: string) => {
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDropdownOpen(false);
+        setMobileOpen(false);
+      }
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+  }, [mobileOpen]);
+
+  const open = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setActiveTab(tab);
+    setDropdownOpen(true);
   };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setActiveTab(null);
-    }, 150);
+  const close = () => {
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 150);
   };
-
-  // Find the content for the active tab
-  const activeContent = [...NAV_LINKS.left, ...NAV_LINKS.right].find(
-    (link) => link.label === activeTab && link.hasDropdown
-  )?.content;
 
   return (
-    <div 
-      className="fixed top-8 left-0 right-0 z-50 flex flex-col items-center justify-start pointer-events-none"
-      style={{ perspective: '1000px' }}
-    >
-      {/* HEADER ROW: Branding, CTAs, and Navbar Pill */}
-      <div className="w-full px-12 flex items-center justify-center relative pointer-events-auto z-50">
-        
-        {/* 1. BRANDING LINK (Far Left) */}
-        <div className="absolute left-12 top-1/2 -translate-y-1/2">
-          <a 
-            href="https://raco.ai" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-xs font-bold tracking-[0.2em] text-neutral-800/60 hover:text-neutral-800 uppercase transition-colors"
-          >
-            Powered by RACOAI
-          </a>
-        </div>
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+      {/* ---------------- Desktop ---------------- */}
+      <div className="relative mx-auto hidden h-[88px] max-w-[1600px] items-center justify-between px-8 lg:flex">
+        <a href={`#${ANCHORS.top}`} className="pointer-events-auto flex items-center gap-3 rounded-full" aria-label="Pulse home">
+          <PulseLogo />
+          <span className="hidden border-l border-forest/15 pl-3 text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-ink-soft xl:block">
+            by RACO AI
+          </span>
+        </a>
 
-        {/* 4. EXISTING NAVBAR PILL (Centered) */}
-        <nav 
-          className="relative px-5 py-2 rounded-full flex items-center gap-3
-                   bg-[#d3d3d3]/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.05)]
-                   transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
-          onMouseLeave={handleMouseLeave}
+        <nav
+          aria-label="Primary"
+          onMouseLeave={close}
+          className={`pointer-events-auto absolute left-1/2 flex -translate-x-1/2 items-center gap-6 rounded-full border border-white/70 px-6 py-2 backdrop-blur-xl transition-all duration-300 ${
+            scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55 shadow-[0_8px_32px_rgba(21,59,55,0.05)]'
+          }`}
         >
-          {/* LEFT LINKS */}
-          <div className="flex items-center gap-5">
-            {NAV_LINKS.left.map((link) => (
-              <div 
-                key={link.label}
-                onMouseEnter={() => handleMouseEnter(link.label)}
-              >
-                <FlipLink hasDropdown={link.hasDropdown} isActive={activeTab === link.label}>
-                  {link.label}
-                </FlipLink>
-              </div>
-            ))}
-          </div>
-
-          {/* LOGO */}
-          <div className="shrink-0 flex items-center justify-center mx-4">
-            <a href="/" className="block hover:scale-105 transition-transform duration-300 opacity-90 hover:opacity-100">
-              <img 
-                src="https://cdn.prod.website-files.com/689989c2270f878736e77521/689ef50f877065195c75d892_IconStyler.svg" 
-                alt="Logo" 
-                className="h-7 w-auto" 
-              />
-            </a>
-          </div>
-
-          {/* RIGHT LINKS */}
-          <div className="flex items-center gap-5">
-            {NAV_LINKS.right.map((link) => (
-              <div 
-                key={link.label}
-                onMouseEnter={() => link.hasDropdown && handleMouseEnter(link.label)}
-              >
-                {link.hasDropdown ? (
-                  <FlipLink hasDropdown={true} isActive={activeTab === link.label}>
+          {NAV.map((link) =>
+            link.dropdown ? (
+              <div key={link.label} onMouseEnter={open}>
+                <button
+                  type="button"
+                  aria-expanded={dropdownOpen}
+                  aria-controls="features-menu"
+                  onClick={() => setDropdownOpen((v) => !v)}
+                  className="rounded-full"
+                >
+                  <FlipLink hasDropdown isActive={dropdownOpen}>
                     {link.label}
                   </FlipLink>
-                ) : (
-                  <a href={link.href}>
-                    <FlipLink hasDropdown={false}>{link.label}</FlipLink>
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* 2 & 3. CTAs (Far Right) */}
-        <div className="absolute right-30 top-1/2 -translate-y-1/2 flex items-center gap-6">
-          <a 
-            href="/demo"
-          >
-            <FlipLink hasDropdown={false}>Book a  demo</FlipLink>
-          </a>
-
-          <a 
-            href="/try-pulse"
-            className="px-4 py-2.5 rounded-full bg-[#FF2E62]/50 backdrop-blur-md border border-white/40 shadow-sm font-semibold text-neutral-800 hover:bg-white/80 hover:shadow-md transition-all inline-block"
-          >
-            <FlipLink hasDropdown={false}>Try Pulse</FlipLink>
-          </a>
-        </div>
-      </div>
-
-      {/* MEGA DROPDOWN CONTAINER */}
-      <AnimatePresence>
-        {activeTab && activeContent && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="pointer-events-auto absolute top-full pt-4 w-full flex justify-center"
-            onMouseEnter={() => {
-              if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            }}
-            onMouseLeave={handleMouseLeave}
-          >
-            {/* GLASS CARD */}
-            <div className="w-[90vw] max-w-6xl overflow-hidden rounded-[2rem] p-5 
-                          bg-[#F4F4F4]/70 backdrop-blur-2xl border border-white/50 
-                          shadow-[0_20px_50px_rgba(0,0,0,0.1),0_0_0_1px_rgba(255,255,255,0.5)]">
-              
-              <div className="grid grid-cols-4 gap-5">
-                {activeContent.map((item, idx) => (
-                  <motion.div
-                    key={item.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group relative cursor-pointer"
-                  >
-                    {/* IMAGE CARD */}
-                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-gray-100 mb-4">
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
-                      <img 
-                        src={item.img} 
-                        alt={item.title} 
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                      />
-                    </div>
-                    
-                    {/* TEXT CONTENT */}
-                    <div className="space-y-1 pl-1">
-                      <h3 className="text-base font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">
-                        {item.title}
-                      </h3>
-                      {item.desc && (
-                        <p className="text-sm text-neutral-500 group-hover:text-neutral-700 transition-colors">
-                          {item.desc}
-                        </p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* BOTTOM FOOTER / CTA (Optional polish) */}
-              <div className="mt-6 pt-4 border-t border-neutral-200/50 flex justify-between items-center px-2">
-                <span className="text-sm font-medium text-neutral-400">
-                  Discover more possibilities with Pulse
-                </span>
-                <button className="text-sm font-semibold text-neutral-900 flex items-center gap-2 group">
-                  View all features 
-                  <span className="block transition-transform group-hover:translate-x-1">→</span>
                 </button>
               </div>
+            ) : (
+              <a key={link.label} href={link.href} onMouseEnter={close} className="rounded-full">
+                <FlipLink>{link.label}</FlipLink>
+              </a>
+            ),
+          )}
+        </nav>
 
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <div className="pointer-events-auto flex items-center gap-5">
+          <a href={LINKS.signIn} target="_blank" rel="noopener noreferrer" className="rounded-full">
+            <FlipLink>Sign in</FlipLink>
+          </a>
+          <CTAButton href={LINKS.requestAccess}>Request access</CTAButton>
+        </div>
+
+        {/* Mega dropdown */}
+        <AnimatePresence>
+          {dropdownOpen && (
+            <motion.div
+              id="features-menu"
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              onMouseEnter={open}
+              onMouseLeave={close}
+              className="pointer-events-auto absolute left-1/2 top-[80px] w-[min(92vw,980px)] -translate-x-1/2"
+            >
+              <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/85 p-4 shadow-lift backdrop-blur-2xl">
+                <div className="grid grid-cols-5 gap-3">
+                  {SHOWCASE.tabs.map((tab, idx) => {
+                    const Icon = TAB_ICONS[tab.id];
+                    return (
+                      <motion.a
+                        key={tab.id}
+                        href={`#${ANCHORS.features}`}
+                        onClick={() => {
+                          openShowcaseTab(tab.id);
+                          setDropdownOpen(false);
+                        }}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.04 }}
+                        className="group flex flex-col gap-3 rounded-2xl bg-mesh-soft p-4 ring-1 ring-line transition-shadow hover:shadow-soft focus-visible:!rounded-2xl"
+                      >
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-teal shadow-soft transition-transform duration-300 group-hover:-translate-y-0.5">
+                          <Icon className="h-5 w-5" aria-hidden />
+                        </span>
+                        <span>
+                          <span className="block text-[15px] font-semibold text-forest">{tab.label}</span>
+                          <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-soft">{tab.summary}</span>
+                        </span>
+                      </motion.a>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex items-center justify-between border-t border-line px-2 pt-3 text-sm">
+                  <span className="text-ink-soft">Works with Facebook Messenger and Instagram. Now in beta.</span>
+                  <a href={`#${ANCHORS.beta}`} onClick={() => setDropdownOpen(false)} className="group flex items-center gap-2 rounded-full font-semibold text-forest">
+                    What’s available today <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ---------------- Mobile / tablet ---------------- */}
+      <div className="pointer-events-auto px-3 pt-3 lg:hidden">
+        <div
+          className={`flex items-center justify-between gap-2 rounded-full border border-white/70 py-1.5 pl-3 pr-1.5 backdrop-blur-xl transition-colors ${
+            scrolled || mobileOpen ? 'bg-white/90 shadow-soft' : 'bg-white/60'
+          }`}
+        >
+          <a href={`#${ANCHORS.top}`} aria-label="Pulse home" className="rounded-full" onClick={() => setMobileOpen(false)}>
+            <PulseLogo className="scale-90 origin-left" />
+          </a>
+          <div className="flex items-center gap-1.5">
+            <a
+              href={LINKS.requestAccess}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-forest px-4 py-2 text-[13.5px] font-semibold text-white"
+            >
+              Request access
+            </a>
+            <button
+              type="button"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              className="grid h-10 w-10 place-items-center rounded-full bg-mint text-forest"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 -z-10 bg-paper/70 backdrop-blur-md"
+              aria-hidden
+            />
+          )}
+          {mobileOpen && (
+            <motion.nav
+              key="menu"
+              id="mobile-menu"
+              aria-label="Mobile"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="mt-2 rounded-[1.75rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl"
+            >
+              <ul className="flex flex-col">
+                {NAV.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between rounded-2xl px-4 py-3.5 font-display text-xl font-semibold text-forest active:bg-mint"
+                    >
+                      {link.label} <span aria-hidden className="text-ink-faint">→</span>
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href={LINKS.signIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-base font-medium text-ink-soft"
+                  >
+                    Sign in to Pulse <span aria-hidden>↗</span>
+                  </a>
+                </li>
+              </ul>
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </div>
+    </header>
   );
 }

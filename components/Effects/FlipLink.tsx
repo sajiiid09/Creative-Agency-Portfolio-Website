@@ -6,12 +6,10 @@ import { ChevronDown } from 'lucide-react';
 
 const FlipLink = ({ 
   children, 
-  href, 
   hasDropdown, 
   isActive 
 }: { 
   children: string; 
-  href?: string; 
   hasDropdown?: boolean; 
   isActive?: boolean; 
 }) => {
@@ -43,9 +41,10 @@ const FlipLink = ({
       // Use local state handlers instead of whileHover
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="relative flex items-center gap-1 cursor-pointer overflow-hidden py-2"
+      className="relative flex items-center gap-1 cursor-pointer overflow-hidden py-1.5"
     >
-      <div className="relative overflow-hidden text-neutral-800 font-medium text-base">
+      <span className="sr-only">{children}</span>
+      <div aria-hidden className="relative overflow-hidden text-forest font-medium text-[15px]">
         {/* Top Text (Visible initially) */}
         <div className="flex">
           {children.split("").map((l, i) => (
@@ -79,11 +78,12 @@ const FlipLink = ({
 
       {hasDropdown && (
         <motion.div
+          aria-hidden
           variants={arrowVariants}
           animate={shouldFlipChevron ? "flipped" : "initial"} // Explicitly controlled
           transition={{ duration: 0.3 }}
         >
-          <ChevronDown className="w-4 h-4 text-neutral-500" />
+          <ChevronDown className="w-4 h-4 text-ink-soft" />
         </motion.div>
       )}
     </motion.div>
