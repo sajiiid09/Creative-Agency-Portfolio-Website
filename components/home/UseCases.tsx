@@ -126,7 +126,16 @@ export default function UseCases() {
                   aria-expanded={isOpen}
                   aria-controls={`usecase-${item.id}`}
                   onClick={() => setExpanded(isOpen ? null : index)}
-                  onMouseEnter={() => setHovered(index)}
+                  onMouseEnter={(e) => {
+                    // appear at the cursor instead of flying in from the last position
+                    if (hovered === null) {
+                      mouseX.set(e.clientX);
+                      mouseY.set(e.clientY);
+                      x.jump(e.clientX);
+                      y.jump(e.clientY);
+                    }
+                    setHovered(index);
+                  }}
                   onMouseLeave={() => setHovered(null)}
                   className="group relative flex w-full items-center justify-between gap-4 px-1 py-7 text-left transition-colors duration-300 hover:bg-mint/40 focus-visible:!rounded-2xl sm:px-4 sm:py-10"
                 >
