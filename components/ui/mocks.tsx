@@ -8,7 +8,7 @@ import {
   BarChart3, BookOpen, Check, CheckCheck, FlaskConical, Hand, Inbox, ListFilter, Package,
   ReceiptText, Rocket, Search, Send, Settings, Sparkles, Truck, Users, Banknote, MapPin,
 } from 'lucide-react';
-import { AITag, Avatar, ChannelIcon } from './primitives';
+import { AITag, Avatar, ChannelIcon, PulseAppTile } from './primitives';
 import { ANALYTICS, CATALOG, CONVERSATION, DEMO, INBOX_THREADS, ORDERS, ORDER_TOTAL, money } from '@/content/pulse';
 
 // ---------------------------------------------------------------------------
@@ -161,7 +161,7 @@ export function AppFrame({ active, title, children, className = '' }: { active: 
   return (
     <div className={`@container flex h-full w-full overflow-hidden rounded-[inherit] bg-[#f6f9f6] text-forest ${className}`}>
       <aside className="hidden w-14 shrink-0 flex-col items-center gap-2 border-r border-line bg-white py-3 @md:flex">
-        <span className="mb-2 grid h-8 w-8 place-items-center rounded-[10px] bg-brand font-display text-[15px] font-bold text-forest">P</span>
+        <PulseAppTile className="mb-2 h-8 w-8" />
         {RAIL.map(({ icon: Icon, key }) => (
           <span key={key} className={`grid h-9 w-9 place-items-center rounded-xl ${active === key ? 'bg-mint text-teal' : 'text-ink-faint'}`}>
             <Icon className="h-[18px] w-[18px]" aria-hidden />

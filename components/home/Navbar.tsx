@@ -64,11 +64,14 @@ export default function Navbar() {
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
       {/* ---------------- Desktop ---------------- */}
       <div className="relative mx-auto hidden h-[88px] max-w-[1600px] items-center justify-between px-8 lg:flex">
-        <a href={`#${ANCHORS.top}`} className="pointer-events-auto flex items-center gap-3 rounded-full" aria-label="Pulse home">
-          <PulseLogo />
-          <span className="hidden border-l border-forest/15 pl-3 text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-ink-soft xl:block">
-            by RACO AI
-          </span>
+        <a
+          href={`#${ANCHORS.top}`}
+          aria-label="Pulse home"
+          className={`pointer-events-auto flex items-center rounded-full border border-white/70 px-4 py-2.5 backdrop-blur-xl transition-all duration-300 ${
+            scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55'
+          }`}
+        >
+          <PulseLogo className="[&_svg]:h-8" />
         </a>
 
         <nav
@@ -169,7 +172,7 @@ export default function Navbar() {
           }`}
         >
           <a href={`#${ANCHORS.top}`} aria-label="Pulse home" className="rounded-full" onClick={() => setMobileOpen(false)}>
-            <PulseLogo className="scale-90 origin-left" />
+            <PulseLogo className="px-1 [&_svg]:h-8" />
           </a>
           <div className="flex items-center gap-1.5">
             <a

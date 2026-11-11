@@ -1,23 +1,23 @@
 import React from 'react';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
+import PulseMark from './PulseMark';
 
 type Channel = 'instagram' | 'messenger';
 
-/** Pulse logo — mark and wordmark match the live product's sign-in screen. */
-export function PulseLogo({ className = '', showWord = true }: { className?: string; showWord?: boolean }) {
+/** Pulse logo — the brand mark only (no wordmark; the hero carries the name). */
+export function PulseLogo({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span
-        aria-hidden
-        className="grid h-8 w-8 place-items-center rounded-[10px] bg-brand font-display text-[17px] font-bold text-forest shadow-[inset_0_-2px_0_rgba(21,59,55,0.12)]"
-      >
-        P
-      </span>
-      {showWord && (
-        <span className="font-display text-[22px] font-bold leading-none tracking-[-0.04em] text-forest">
-          pulse<span className="text-teal">.</span>
-        </span>
-      )}
+    <span className={`inline-flex items-center text-[#025b4f] ${className}`}>
+      <PulseMark className="h-9 w-auto" />
+    </span>
+  );
+}
+
+/** Small app tile used inside the product mockups. */
+export function PulseAppTile({ className = 'h-9 w-9' }: { className?: string }) {
+  return (
+    <span aria-hidden className={`grid place-items-center rounded-[11px] bg-mint text-[#025b4f] ${className}`}>
+      <PulseMark className="h-[55%] w-auto" />
     </span>
   );
 }

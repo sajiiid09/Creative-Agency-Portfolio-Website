@@ -171,7 +171,7 @@ export default function Convergence() {
           <div className="relative mx-auto aspect-square w-full max-w-[340px] sm:aspect-[4/3] sm:max-w-none">
             <motion.div style={{ opacity: frameOpacity, scale: frameScale }} className="absolute -inset-3 rounded-[2rem] bg-mesh-sage shadow-lift ring-1 ring-white sm:-inset-5">
               <div className="flex items-center gap-2 px-5 pt-4">
-                <PulseLogo className="origin-left scale-75" />
+                <PulseLogo className="[&_svg]:h-7" />
                 <span className="ml-auto hidden sm:block"><DemoLabel /></span>
               </div>
             </motion.div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FOOTER, LINKS } from '@/content/pulse';
-import { PulseLogo } from '../ui/primitives';
+import PulseMark from '../ui/PulseMark';
 
 export default function Footer() {
   return (
@@ -8,9 +8,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="mb-20 grid grid-cols-1 gap-12 md:grid-cols-12">
           <div className="flex flex-col gap-5 md:col-span-5">
-            <span className="w-fit rounded-2xl bg-white px-3 py-2">
-              <PulseLogo />
-            </span>
+            <PulseMark className="h-12 w-auto text-white" title="Pulse" />
             <p className="max-w-sm leading-relaxed text-white/75">{FOOTER.tagline}</p>
             <p className="text-sm text-white/60">
               Pulse by{' '}
@@ -44,9 +42,9 @@ export default function Footer() {
           </nav>
         </div>
 
-        <p aria-hidden className="select-none border-t border-white/10 pt-10 text-center font-display text-[24vw] font-bold leading-[0.8] tracking-[-0.06em] text-white/[0.07] md:text-[20vw]">
-          pulse.
-        </p>
+        <div aria-hidden className="flex select-none justify-center border-t border-white/10 pt-12 text-white/[0.07]">
+          <PulseMark className="h-auto w-[46vw] max-w-[560px]" />
+        </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row">
           <p>© {new Date().getFullYear()} RACO AI Technologies. Pulse is in beta.</p>

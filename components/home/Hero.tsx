@@ -16,7 +16,7 @@ import {
 } from 'framer-motion';
 import { Sparkles, UserRound, ShoppingBag, Clock3, Inbox, Users, Package, ReceiptText, BarChart3 } from 'lucide-react';
 import { CONVERSATION, DEMO, HERO, money } from '@/content/pulse';
-import { Avatar, ChannelIcon, CTAButton, DemoLabel, Eyebrow, AITag } from '../ui/primitives';
+import { Avatar, ChannelIcon, CTAButton, DemoLabel, Eyebrow, AITag, PulseAppTile } from '../ui/primitives';
 import { ChatBubble, MiniStat, OrderDraftCard, ProductQuoteCard, ThreadList, TypingDots } from '../ui/mocks';
 
 // Design size of the interface canvas; it is scaled to fit the expanding card.
@@ -262,7 +262,7 @@ function DesktopCanvas({ p }: { p: MotionValue<number> }) {
     <div className="flex h-full w-full bg-[#f6f9f6] text-forest">
       {/* rail */}
       <aside className="flex w-16 shrink-0 flex-col items-center gap-2 border-r border-line bg-white py-4">
-        <span className="mb-3 grid h-9 w-9 place-items-center rounded-[11px] bg-brand font-display text-[17px] font-bold">P</span>
+        <PulseAppTile className="mb-3 h-9 w-9" />
         {[Inbox, Users, Package, ReceiptText, BarChart3, Sparkles].map((Icon, i) => (
           <span key={i} className={`grid h-10 w-10 place-items-center rounded-xl ${i === 0 ? 'bg-mint text-teal' : 'text-ink-faint'}`}>
             <Icon className="h-[19px] w-[19px]" aria-hidden />
