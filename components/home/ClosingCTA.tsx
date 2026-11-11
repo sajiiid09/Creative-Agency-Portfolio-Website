@@ -8,9 +8,10 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { ANCHORS, CLOSING, DEMO } from '@/content/pulse';
+import { ANCHORS, CLOSING } from '@/content/pulse';
 import { CTAButton } from '../ui/primitives';
 import { MiniStat, OrderDraftCard, ProductQuoteCard } from '../ui/mocks';
+import PulseMark from '../ui/PulseMark';
 
 function Bob({ children, i, className = '' }: { children: React.ReactNode; i: number; className?: string }) {
   return (
@@ -73,7 +74,9 @@ export default function ClosingCTA() {
 
             {/* CTA */}
             <motion.div style={{ opacity: contentOpacity, y: contentY }} className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white sm:p-10">
-              <img src={DEMO.product.img} alt="" className="mb-8 h-16 w-16 rounded-2xl object-cover ring-4 ring-white/15 sm:h-20 sm:w-20" loading="lazy" />
+              <span className="mb-8 grid h-16 w-16 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur sm:h-20 sm:w-20">
+                <PulseMark className="h-auto w-[62%] text-white" title="Pulse" />
+              </span>
               <h2 className="text-balance font-display text-[40px] font-semibold leading-[0.98] tracking-[-0.035em] sm:text-6xl lg:text-8xl">
                 {CLOSING.headline[0]} <br className="hidden sm:block" />
                 <span className="text-brand">{CLOSING.headline[1]}</span>

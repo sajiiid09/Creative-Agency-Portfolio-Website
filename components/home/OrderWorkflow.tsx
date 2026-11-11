@@ -8,16 +8,26 @@
  */
 import React, { useRef } from 'react';
 import { motion, MotionValue, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { BookOpen, Check, Package, Truck } from 'lucide-react';
+import { BookOpen, Check, Package, Truck, Zap } from 'lucide-react';
 import { ANCHORS, CONVERSATION, DEMO, LINKS, WORKFLOW, money } from '@/content/pulse';
-import { Avatar, ChannelIcon, CTAButton, DemoLabel, Eyebrow } from '../ui/primitives';
+import { Avatar, ChannelIcon, CTAButton, Eyebrow } from '../ui/primitives';
 import { ChatBubble, OrderDraftCard, ProductQuoteCard } from '../ui/mocks';
+import PulseMark from '../ui/PulseMark';
 
 const STEPS = WORKFLOW.steps;
 
-function Stage({ tone, children }: { tone: string; children: React.ReactNode }) {
+function InstantBadge() {
+  return (
+    <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-semibold text-forest shadow-soft backdrop-blur">
+      <Zap className="h-3.5 w-3.5 fill-brand text-teal" aria-hidden /> Instant response
+    </span>
+  );
+}
+
+function Stage({ tone, badge = false, children }: { tone: string; badge?: boolean; children: React.ReactNode }) {
   return (
     <div className={`relative flex h-full w-full items-center justify-center overflow-hidden p-5 sm:p-10 ${tone}`}>
+      {badge && <InstantBadge />}
       <div className="relative w-full max-w-[440px] origin-center scale-[0.78] sm:scale-100">{children}</div>
     </div>
   );
@@ -39,16 +49,24 @@ function PhoneHeader() {
 
 const VISUALS = [
   // 1 — Customer asks
-  <div key="ask" className="relative h-full w-full">
-    <img src={DEMO.product.img} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-    <div className="absolute inset-0 bg-gradient-to-t from-forest/60 via-forest/10 to-transparent" />
-    <div className="absolute inset-x-5 bottom-6 sm:inset-x-10 sm:bottom-10">
+  <div
+    key="ask"
+    className="relative h-full w-full overflow-hidden"
+    style={{
+      background:
+        'radial-gradient(70% 60% at 20% 15%, rgba(197,228,120,0.18) 0%, transparent 60%), radial-gradient(60% 60% at 85% 90%, rgba(156,199,187,0.25) 0%, transparent 60%), linear-gradient(160deg, #0d5a45 0%, #0a4a3a 45%, #06382c 100%)',
+    }}
+  >
+    {/* Pulse mark sits behind the notification and the customer's question */}
+    <InstantBadge />
+    <PulseMark className="absolute left-1/2 top-1/2 h-auto w-[70%] max-w-[380px] -translate-x-1/2 -translate-y-1/2 text-white/[0.09]" />
+    <div className="absolute inset-0 flex flex-col justify-center px-5 sm:px-10">
       <PhoneHeader />
       <ChatBubble from="customer" className="[&>div]:text-[15px]">{CONVERSATION[0].text}</ChatBubble>
     </div>
   </div>,
   // 2 — Pulse quotes
-  <Stage key="quote" tone="bg-mesh-sage">
+  <Stage key="quote" tone="bg-mesh-sage" badge>
     <div className="mb-3 hidden opacity-50 sm:block"><ChatBubble from="customer">{CONVERSATION[0].text}</ChatBubble></div>
     <ChatBubble from="ai">{CONVERSATION[1].text}</ChatBubble>
     <ProductQuoteCard className="ml-auto mt-3 w-[min(280px,90%)]" />
@@ -108,12 +126,10 @@ function PinnedWorkflow() {
                 {v}
               </StackedCard>
             ))}
-            <DemoLabel className="absolute right-3 top-3 z-50" />
           </div>
 
           {/* Copy */}
           <div className="relative min-h-[200px] lg:h-[62vh]">
-            <StepProgress progress={scrollYProgress} />
             {STEPS.map((s, i) => (
               <StackedText key={s.step} index={i} total={STEPS.length} progress={scrollYProgress} step={s} />
             ))}
@@ -151,11 +167,6 @@ function StackedText({ index, total, progress, step: s }: { index: number; total
   const pointerEvents = useTransform(opacity, (v) => (v > 0.5 ? 'auto' : 'none'));
   return (
     <motion.div style={{ opacity, y, pointerEvents }} className="absolute inset-0 flex flex-col justify-start pt-6 lg:justify-center lg:pt-0">
-      <div className="mb-3 flex items-center gap-3 lg:mb-6">
-        <span className="font-display text-sm font-semibold text-teal">{s.step}</span>
-        <span className="h-px w-8 bg-teal/40" />
-        <span className="text-sm font-semibold uppercase tracking-[0.16em] text-forest">{s.category}</span>
-      </div>
       <h3 className="font-display text-2xl font-semibold leading-tight tracking-[-0.02em] text-forest sm:text-3xl md:text-5xl lg:mb-6">{s.title}</h3>
       <p className="mt-2 max-w-md text-[15px] leading-relaxed text-ink-soft md:text-lg">{s.description}</p>
       {isLast && (
@@ -167,14 +178,6 @@ function StackedText({ index, total, progress, step: s }: { index: number; total
   );
 }
 
-function StepProgress({ progress }: { progress: MotionValue<number> }) {
-  const width = useTransform(progress, [0, 1], ['8%', '100%']);
-  return (
-    <div className="absolute left-0 right-0 top-0 h-[3px] overflow-hidden rounded-full bg-sage lg:top-[6%]" aria-hidden>
-      <motion.div style={{ width }} className="h-full rounded-full bg-teal" />
-    </div>
-  );
-}
 
 function StaticWorkflow() {
   return (
@@ -187,8 +190,7 @@ function StaticWorkflow() {
             <li key={s.step} className="overflow-hidden rounded-[2rem] bg-white shadow-soft">
               <div className="aspect-[4/3]">{VISUALS[i]}</div>
               <div className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-teal">{s.step} · {s.category}</p>
-                <h3 className="mt-2 font-display text-2xl font-semibold text-forest">{s.title}</h3>
+                <h3 className="font-display text-2xl font-semibold text-forest">{s.title}</h3>
                 <p className="mt-2 text-ink-soft">{s.description}</p>
               </div>
             </li>
