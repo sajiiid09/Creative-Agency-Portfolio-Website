@@ -72,15 +72,7 @@ export default function Navbar() {
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
       {/* ---------------- Desktop ---------------- */}
       <div className="relative mx-auto hidden h-[88px] max-w-[1600px] items-center justify-between px-8 lg:flex">
-        <a
-          href={`#${ANCHORS.top}`}
-          aria-label="Pulse home"
-          className={`pointer-events-auto flex items-center rounded-full border px-4 py-2.5 backdrop-blur-xl transition-all duration-300 ${
-            onDark ? 'border-white/15 bg-white/5' : scrolled ? 'border-white/70 bg-white/80 shadow-soft' : 'border-white/70 bg-white/55'
-          }`}
-        >
-          <PulseLogo tone={onDark ? 'white' : 'brand'} className="[&_svg]:h-8" />
-        </a>
+        <span aria-hidden />
 
         <nav
           aria-label="Primary"
@@ -89,9 +81,16 @@ export default function Navbar() {
             onDark ? 'bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.12)]' : scrolled ? 'bg-white/80 shadow-soft' : 'bg-white/55 shadow-[0_8px_32px_rgba(21,59,55,0.05)]'
           }`}
         >
-          {NAV.map((link) =>
-            link.dropdown ? (
-              <div key={link.label} onMouseEnter={open}>
+          {NAV.map((link, i) => (
+            <React.Fragment key={link.label}>
+            {/* Pulse logo sits in the middle of the pill, between How It Works and Features */}
+            {i === 2 && (
+              <a href={`#${ANCHORS.top}`} aria-label="Pulse home" className="mx-1 grid place-items-center rounded-full px-1 transition-transform duration-300 hover:scale-105">
+                <PulseLogo className="[&_svg]:h-8" />
+              </a>
+            )}
+            {link.dropdown ? (
+              <div onMouseEnter={open}>
                 <button
                   type="button"
                   aria-expanded={dropdownOpen}
@@ -105,11 +104,12 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <a key={link.label} href={link.href} onMouseEnter={close} className="rounded-full">
+              <a href={link.href} onMouseEnter={close} className="rounded-full">
                 <FlipLink>{link.label}</FlipLink>
               </a>
-            ),
-          )}
+            )}
+            </React.Fragment>
+          ))}
         </nav>
 
         <div className="pointer-events-auto flex items-center gap-5">
