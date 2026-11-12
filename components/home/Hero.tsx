@@ -28,7 +28,7 @@ const GEOMETRY = {
 // Scroll choreography (progress 0 → 1 across the pinned track)
 const T = {
   introOut: [0, 0.1],
-  zoom: [0.03, 0.12, 0.2, 0.28], // camera flies into the "U" of PULSE
+  zoom: [0.03, 0.12, 0.2], // the U fills the viewport; further scaling only grows the compositor layer
   wordOut: [0.22, 0.28],
   expand: [0.12, 0.31], // dashboard grows out of the letter
   msg1: [0.32, 0.37],
@@ -100,7 +100,7 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
   const introEvents = useTransform(introOpacity, (v) => (v > 0.4 ? 'auto' : 'none'));
 
   // Wordmark: accelerating zoom into the U, then it fades away
-  const wordScale = useTransform(p, T.zoom, [1, 2.4, 7, 26]);
+  const wordScale = useTransform(p, T.zoom, [1, 2.4, 7]);
   const wordOpacity = useTransform(p, T.wordOut, [1, 0]);
 
   // Dashboard grows out of the U and settles in the centre of the screen
@@ -143,7 +143,7 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
           ref={wordRef}
           aria-hidden
           style={{ scale: wordScale, opacity: wordOpacity, transformOrigin: `${focus.ox}px ${focus.oy}px` }}
-          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-0 z-10 select-none text-center font-display text-[28vw] font-bold leading-[0.88] tracking-[-0.05em] will-change-transform md:bottom-2 md:text-[25vw]"
+          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-0 z-10 select-none text-center font-display text-[28vw] font-bold leading-[0.88] tracking-[-0.05em] md:bottom-2 md:text-[25vw]"
         >
           P<span ref={uRef}>U</span>LSE
         </motion.p>

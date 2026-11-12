@@ -99,7 +99,7 @@ export default function Navbar() {
                   type="button"
                   aria-expanded={dropdownOpen}
                   aria-controls="features-menu"
-                  onClick={() => setDropdownOpen((v) => !v)}
+                  onClick={open}
                   className="rounded-full"
                 >
                   <FlipLink hasDropdown isActive={dropdownOpen}>
