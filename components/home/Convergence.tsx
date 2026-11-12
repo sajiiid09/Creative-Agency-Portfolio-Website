@@ -190,7 +190,7 @@ export default function Convergence() {
 function Problem({ text, p, at }: { text: string; p: MotionValue<number>; at: number }) {
   const done = useTransform(p, [at, at + 0.06], [0, 1]);
   const textOpacity = useTransform(done, [0, 1], [1, 0.55]);
-  const decoration = useTransform(done, [0, 1], ['rgba(21,59,55,0)', 'rgba(21,59,55,0.55)']);
+  const strikeScale = useTransform(done, [0, 1], [0, 1]);
   return (
     <li className="flex items-start gap-3">
       <span className="relative mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fbe9e5] sm:h-7 sm:w-7">
@@ -198,12 +198,19 @@ function Problem({ text, p, at }: { text: string; p: MotionValue<number>; at: nu
           <Check className="h-3.5 w-3.5" aria-hidden />
         </motion.span>
       </span>
-      <motion.span
-        style={{ opacity: textOpacity, textDecorationColor: decoration }}
-        className="text-[14px] font-medium leading-snug text-forest line-through decoration-[1.5px] sm:text-lg"
-      >
-        {text}
-      </motion.span>
+      <div className="relative inline-block">
+        <motion.span
+          style={{ opacity: textOpacity }}
+          className="text-[14px] font-medium leading-snug text-forest sm:text-lg"
+        >
+          {text}
+        </motion.span>
+        <motion.span
+          style={{ scaleX: strikeScale, opacity: done }}
+          className="absolute left-0 top-1/2 h-[1.5px] w-full origin-left bg-forest/55 pointer-events-none"
+          aria-hidden
+        />
+      </div>
     </li>
   );
 }

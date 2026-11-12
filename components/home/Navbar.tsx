@@ -35,9 +35,13 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 24);
-      const hero = document.getElementById(ANCHORS.top);
-      setOnDark(!!hero && window.scrollY < hero.offsetTop + hero.offsetHeight - window.innerHeight * 0.9);
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      // onDark is true only while the header is within the hero top dark shade (~22vh)
+      setOnDark(y < window.innerHeight * 0.22);
+      // Dismiss mega-dropdown immediately if the user scrolls
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setDropdownOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -65,7 +69,7 @@ export default function Navbar() {
     setDropdownOpen(true);
   };
   const close = () => {
-    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 150);
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 220);
   };
 
   return (
@@ -127,7 +131,7 @@ export default function Navbar() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
               onMouseEnter={open}
               onMouseLeave={close}
-              className="pointer-events-auto absolute left-1/2 top-[80px] w-[min(92vw,980px)] -translate-x-1/2"
+              className="pointer-events-auto absolute left-1/2 top-[68px] pt-3 w-[min(92vw,980px)] -translate-x-1/2"
             >
               <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/85 p-4 shadow-lift backdrop-blur-2xl">
                 <div className="grid grid-cols-5 gap-3">

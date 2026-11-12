@@ -38,7 +38,8 @@ const T = {
   draft: [0.61, 0.68],
   msg4: [0.66, 0.71],
   settle: [0.76, 0.9],
-  floats: [0.78, 0.94],
+  floats: [0.78, 0.93],
+  exit: [0.94, 0.99], // dissolves before Section 02 transition
 };
 
 function useViewport() {
@@ -114,11 +115,11 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
   const left = useTransform(p, (pp) => focus.cx + (vp.w / 2 - focus.cx) * ease(t(pp)));
   const top = useTransform(p, (pp) => focus.cy + ((g.top / 100) * vp.h - focus.cy) * ease(t(pp)));
   const radius = useTransform(p, T.expand, [14, 28]);
-  const cardOpacity = useTransform(p, [T.expand[0], T.expand[0] + 0.03], [0, 1]);
+  const cardOpacity = useTransform(p, [T.expand[0], T.expand[0] + 0.03, T.exit[0], T.exit[1]], [0, 1, 1, 0]);
   const settleScale = useTransform(p, T.settle, [1, vp.mobile ? 0.92 : 0.86]);
 
-  // CTAs: fade in after the expansion completes
-  const ctaOpacity = useTransform(p, [T.expand[1], T.expand[1] + 0.04], [0, 1]);
+  // CTAs: fade in after expansion, dissolve before Section 02 transition
+  const ctaOpacity = useTransform(p, [T.expand[1], T.expand[1] + 0.04, T.exit[0], T.exit[1]], [0, 1, 1, 0]);
   const ctaY = useTransform(p, [T.expand[1], T.expand[1] + 0.04], [24, 0]);
   const ctaEvents = useTransform(ctaOpacity, (v) => (v > 0.5 ? 'auto' : 'none'));
 
@@ -142,7 +143,7 @@ function AnimatedHero({ vp }: { vp: { w: number; h: number; mobile: boolean } })
           ref={wordRef}
           aria-hidden
           style={{ scale: wordScale, opacity: wordOpacity, transformOrigin: `${focus.ox}px ${focus.oy}px` }}
-          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-[-4vw] z-10 select-none text-center font-display text-[30vw] font-bold leading-[0.8] tracking-[-0.06em] will-change-transform md:bottom-[-3.5vw] md:text-[27vw]"
+          className="wordmark-gradient pointer-events-none absolute inset-x-0 bottom-0 z-10 select-none text-center font-display text-[28vw] font-bold leading-[0.88] tracking-[-0.05em] will-change-transform md:bottom-2 md:text-[25vw]"
         >
           P<span ref={uRef}>U</span>LSE
         </motion.p>
@@ -386,9 +387,10 @@ function FloatingCard({ p, index, from, to, className, children }: { p: MotionVa
   // arc: overshoot upward at the midpoint, like the original carousel apex
   const y = useTransform(p, [start, mid, end], [from[1], -24, to[1]]);
   const rotate = useTransform(p, [start, end], [from[2], to[2]]);
-  const opacity = useTransform(p, [start, start + 0.03], [0, 1]);
+  const opacity = useTransform(p, [start, start + 0.03, T.exit[0], T.exit[1]], [0, 1, 1, 0]);
+  const pointerEvents = useTransform(opacity, (v) => (v > 0.5 ? 'auto' : 'none'));
   return (
-    <motion.div style={{ x, y, rotate, opacity }} className={`absolute z-30 ${className}`} aria-hidden>
+    <motion.div style={{ x, y, rotate, opacity, pointerEvents: pointerEvents as unknown as MotionValue<string> }} className={`absolute z-30 ${className}`} aria-hidden>
       {children}
     </motion.div>
   );

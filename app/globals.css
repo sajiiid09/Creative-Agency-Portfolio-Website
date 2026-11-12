@@ -32,8 +32,6 @@ body {
 }
 
 html {
-  position: relative; /* lets framer-motion measure scroll offsets against the page */
-  scroll-behavior: smooth;
   scroll-padding-top: 96px;
 }
 
