@@ -76,7 +76,7 @@ export default function IntroReveal() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 1.1, duration: 0.6 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
           className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-ink-soft md:mt-8 md:text-lg"
         >
           {sub}
